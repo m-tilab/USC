@@ -92,6 +92,7 @@ function createScene(){
 	addHero();
 	addLight();
 	addExplosion();
+	addSound();
 	
 	camera.position.z = 6.5;
 	camera.position.y = 2.5;
@@ -151,37 +152,13 @@ function addExplosion(){
 	
 	var textGeometry;
 
-var loader = new THREE.FontLoader();
 
-	loader.load( 'helvetiker_regular.typeface.json', function ( font ) {
-
-		textGeometry = new THREE.TextGeometry( 'Game Over!', {
-			font: font,
-			size: 80,
-			height: 5,
-			curveSegments: 12,
-			bevelEnabled: true,
-			bevelThickness: 10,
-			bevelSize: 8,
-			bevelOffset: 0,
-			bevelSegments: 5
-		} );
-	} );
-
-	
-	var textMaterial = new THREE.MeshPhongMaterial(
-		{ color: 0x000000, specular: 0xffffff }
-	);
-
-	gameOverMesh = new THREE.Mesh( textGeometry, textMaterial );
 	
 	//textGeometry.computeBoundingBox();
     //var textWidth = textGeometry.boundingBox.max.x - textGeometry.boundingBox.min.x;
     
-    gameOverMesh.position.set( 1 , 1, 0 );
-	scene.add( gameOverMesh );
-	console.log("text game over added to scene")
-	gameOverMesh.visible=true;
+    
+	
 	particles.visible=false;
 }
 function createTreesPool(){
@@ -437,6 +414,12 @@ function update(){
     	if(!hasCollided){
 			score+=2*treeReleaseInterval;
 			scoreText.innerHTML=score.toString();
+		} else {
+			scoreText.innerHTML = "game over";
+			rollingSpeed = 0;
+			heroRollingSpeed = 0;
+			bounceValue = 0;
+			
 		}
     }
     doTreeLogic();
@@ -458,6 +441,10 @@ function doTreeLogic(){
 				console.log("hit");
 				hasCollided=true;
 				explode();
+				addExplodeSound();
+				
+				//addGameOverTexture();
+				
 			}
 		}
 	});
@@ -496,7 +483,9 @@ function explode(){
 	}
 	explosionPower=1.07;
 	particles.visible=true;
-	gameOverMesh.visible=true;
+	
+	
+	
 }
 function render(){
     renderer.render(scene, camera);//draw
@@ -512,6 +501,78 @@ function onWindowResize() {
 	renderer.setSize(sceneWidth, sceneHeight);
 	camera.aspect = sceneWidth/sceneHeight;
 	camera.updateProjectionMatrix();
+}
+
+function addSound() {
+	var listener = new THREE.AudioListener();
+	camera.add( listener );
+	
+	console.log("sound logged")
+
+	// create a global audio source
+	var sound = new THREE.Audio( listener );
+
+	var audioLoader = new THREE.AudioLoader();
+
+	//Load a sound and set it as the Audio object's buffer
+	audioLoader.load( 'background.mp3', function( buffer ) {
+		sound.setBuffer( buffer );
+		sound.setLoop(true);
+		sound.setVolume(0.5);
+		sound.play();
+	});
+
+}
+
+
+function addExplodeSound() {
+	var listener = new THREE.AudioListener();
+	camera.add( listener );
+	
+	console.log("sound logged")
+
+	// create a global audio source
+	var sound = new THREE.Audio( listener );
+
+	var audioLoader = new THREE.AudioLoader();
+
+	//Load a sound and set it as the Audio object's buffer
+	audioLoader.load( 'explode.mp3', function( buffer ) {
+		sound.setBuffer( buffer );
+		sound.setLoop(false);
+		sound.setVolume(5);
+		sound.setDuration
+		sound.play();
+	});
+}
+
+function addGameOverTexture() {
+	var loader = new THREE.FontLoader();
+
+	loader.load( 'helvetiker_regular.typeface.json', function ( font ) {
+
+		textGeometry = new THREE.TextGeometry( 'Game Over!', {
+			font: font,
+			size: 80,
+			height: 5,
+			curveSegments: 12,
+			bevelEnabled: true,
+			bevelThickness: 10,
+			bevelSize: 8,
+			bevelOffset: 0,
+			bevelSegments: 5
+		} );
+	} );
+
+	
+	var textMaterial = new THREE.MeshPhongMaterial(
+		{ color: 0x000000, specular: 0xffffff }
+	);
+
+	gameOverMesh = new THREE.Mesh( textGeometry, textMaterial );
+	
+	gameOverMesh.position.set( 1 , 1, 0 );
+	scene.add( gameOverMesh );
 }
 
 </script>
